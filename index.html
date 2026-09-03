@@ -133,61 +133,49 @@
         .panic-section {
             text-align: center;
             margin: 20px 0 10px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Container for the button and visual countdown ring */
-        .panic-wrapper {
-            position: relative;
-            width: 140px;
-            height: 140px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* Circular progress bar behind the button */
-        .progress-ring {
-            position: absolute;
-            width: 140px;
-            height: 140px;
-            transform: rotate(-90deg);
-        }
-
-        .progress-ring__circle {
-            transition: stroke-dashoffset 0.1s linear;
-            stroke: var(--emergency-red);
-            stroke-width: 6;
-            stroke-linecap: round;
-            fill: transparent;
         }
 
         .panic-btn {
             position: relative;
-            width: 126px;
-            height: 126px;
+            width: 130px;
+            height: 130px;
             border-radius: 50%;
-            background: radial-gradient(circle, #ff6666 0%, var(--emergency-red) 100%);
+            background: radial-gradient(circle, #cc2929 0%, #990000 100%);
             border: 4px solid var(--gold-border);
             color: white;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 0 25px rgba(255, 51, 51, 0.6);
             outline: none;
             user-select: none;
+            overflow: hidden; /* Keeps the fill inside the circular button */
+        }
+
+        /* The fill element that sweeps from left to right behind the text */
+        .panic-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%; /* Starts at 0, grows to 100% on hold */
+            background: radial-gradient(circle, #ff6666 0%, var(--emergency-red) 100%);
+            z-index: 1;
+            transition: width 0.05s linear;
+        }
+
+        /* Ensures text sits cleanly on top of the moving fill */
+        .panic-btn span {
+            position: relative;
             z-index: 2;
         }
 
         .hold-reminder {
             font-size: 0.6rem;
             color: #ffffff;
-            margin-top: 8px;
+            margin-top: 6px;
             text-transform: uppercase;
             opacity: 0.85;
-            letter-spacing: 0.5px;
         }
 
         .bypass-section {
@@ -317,21 +305,16 @@
                 </div>
 
                 <div class="panic-section">
-                    <div class="panic-wrapper">
-                        <!-- SVG Progress Ring for Hold Animation -->
-                        <svg class="progress-ring" width="140" height="140">
-                            <circle class="progress-ring__circle" stroke-dasharray="377" stroke-dashoffset="377" cx="70" cy="70" r="60"/>
-                        </svg>
-                        <button class="panic-btn" 
-                            id="panicBtn"
-                            onmousedown="startHold(event)" 
-                            onmouseup="cancelHold(event)" 
-                            ontouchstart="startHold(event)" 
-                            ontouchend="cancelHold(event)">
-                            EMERGENCY<br><span id="countdownText" style="font-size:0.75rem;">BROADCAST</span>
-                        </button>
-                    </div>
-                    <div class="hold-reminder" id="holdInstruction">Hold 3 Seconds</div>
+                    <button class="panic-btn" 
+                        id="panicBtn"
+                        onmousedown="startHold(event)" 
+                        onmouseup="cancelHold(event)" 
+                        ontouchstart="startHold(event)" 
+                        ontouchend="cancelHold(event)">
+                        <div class="panic-fill" id="panicFill"></div>
+                        <span>EMERGENCY<br><span id="countdownText" style="font-size:0.7rem;">BROADCAST</span></span>
+                    </button>
+                    <div class="hold-reminder">Hold 3 Seconds</div>
                 </div>
 
                 <div class="bypass-section" style="margin-top: 15px;">
@@ -414,14 +397,12 @@
         </div>
     </div>
 
-    <!-- LOCAL STANDALONE SYSTEM LOGIC WITH HOLD ANIMATION -->
+    <!-- LOCAL STANDALONE SYSTEM LOGIC WITH FILL ANIMATION -->
     <script>
         let currentAssignment = "Classroom 204 (Level 2)";
         let holdTimer;
         let animationInterval;
         let isHolding = false;
-        
-        const CIRCLE_CIRCUMFERENCE = 377; // 2 * pi * r (r=60)
 
         function initSystem() {
             const lastAssignment = localStorage.getItem('tacnet_last_assignment');
@@ -429,11 +410,6 @@
                 currentAssignment = lastAssignment;
                 document.getElementById('consoleActiveAssignment').textContent = currentAssignment;
             }
-            
-            const circle = document.querySelector('.progress-ring__circle');
-            circle.style.strokeDasharray = CIRCLE_CIRCUMFERENCE;
-            circle.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE;
-            
             console.log("TACNET School initialized in local standalone mode.");
         }
 
@@ -471,9 +447,8 @@
 
             const log = document.getElementById('statusLog');
             const btn = document.getElementById('panicBtn');
+            const fill = document.getElementById('panicFill');
             const countdownText = document.getElementById('countdownText');
-            const holdInstruction = document.getElementById('holdInstruction');
-            const circle = document.querySelector('.progress-ring__circle');
 
             log.style.color = '#ffd700';
             log.innerHTML = `<strong>HOLDING...</strong> Transmitting alert for <strong>${currentAssignment}</strong>.`;
@@ -484,17 +459,16 @@
 
             animationInterval = setInterval(() => {
                 let elapsed = Date.now() - startTime;
-                let progress = elapsed / duration;
+                let progress = (elapsed / duration) * 100;
                 
-                if (progress >= 1) {
-                    progress = 1;
+                if (progress >= 100) {
+                    progress = 100;
                 }
 
-                // Update SVG circle stroke offset
-                let offset = CIRCLE_CIRCUMFERENCE - (progress * CIRCLE_CIRCUMFERENCE);
-                circle.style.strokeDashoffset = offset;
+                // Expand fill width from left to right across the button
+                fill.style.width = `${progress}%`;
 
-                // Update visual countdown numbers on button face
+                // Update text counter
                 let secondsLeft = Math.ceil((duration - elapsed) / 1000);
                 if (secondsLeft > 0) {
                     countdownText.textContent = `${secondsLeft}s LEFT`;
@@ -505,7 +479,7 @@
                 if (elapsed >= duration) {
                     clearInterval(animationInterval);
                 }
-            }, 50);
+            }, 30);
 
             holdTimer = setTimeout(() => {
                 triggerEmergency();
@@ -519,9 +493,9 @@
             clearTimeout(holdTimer);
             clearInterval(animationInterval);
 
-            // Reset visual ring and button text
-            const circle = document.querySelector('.progress-ring__circle');
-            circle.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE;
+            // Reset fill width and button text
+            const fill = document.getElementById('panicFill');
+            fill.style.width = '0%';
             document.getElementById('countdownText').textContent = "BROADCAST";
 
             const btn = document.getElementById('panicBtn');
@@ -538,8 +512,8 @@
             isHolding = false;
             clearInterval(animationInterval);
             
-            const circle = document.querySelector('.progress-ring__circle');
-            circle.style.strokeDashoffset = 0; // Fully filled ring
+            const fill = document.getElementById('panicFill');
+            fill.style.width = '100%';
 
             const log = document.getElementById('statusLog');
             const btn = document.getElementById('panicBtn');
@@ -567,8 +541,8 @@
             clearInterval(animationInterval);
             isHolding = false;
 
-            const circle = document.querySelector('.progress-ring__circle');
-            circle.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE;
+            const fill = document.getElementById('panicFill');
+            fill.style.width = '0%';
             document.getElementById('countdownText').textContent = "BROADCAST";
 
             const log = document.getElementById('statusLog');
