@@ -78,9 +78,9 @@
             background: rgba(11, 29, 58, 0.8);
             border: 1px solid var(--gold-border);
             color: var(--gold-text);
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             font-weight: bold;
-            padding: 6px 4px;
+            padding: 6px 2px;
             border-radius: 4px;
             cursor: pointer;
             text-transform: uppercase;
@@ -126,7 +126,7 @@
             padding: 10px;
             border-radius: 8px;
             margin-bottom: 15px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-light);
         }
 
@@ -149,22 +149,20 @@
             box-shadow: 0 0 25px rgba(255, 51, 51, 0.6);
             outline: none;
             user-select: none;
-            overflow: hidden; /* Keeps the fill inside the circular button */
+            overflow: hidden;
         }
 
-        /* The fill element that sweeps from left to right behind the text */
         .panic-fill {
             position: absolute;
             top: 0;
             left: 0;
             height: 100%;
-            width: 0%; /* Starts at 0, grows to 100% on hold */
+            width: 0%;
             background: radial-gradient(circle, #ff6666 0%, var(--emergency-red) 100%);
             z-index: 1;
             transition: width 0.05s linear;
         }
 
-        /* Ensures text sits cleanly on top of the moving fill */
         .panic-btn span {
             position: relative;
             z-index: 2;
@@ -231,6 +229,13 @@
             background: rgba(255, 215, 0, 0.35);
         }
 
+        .grid-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
         .qr-section {
             text-align: center;
             background: rgba(11, 29, 58, 0.6);
@@ -258,7 +263,7 @@
         }
 
         .status-log {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             background: rgba(0,0,0,0.3);
             padding: 8px;
             border-radius: 6px;
@@ -268,7 +273,7 @@
         }
 
         .disclaimer {
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             color: #b0c4de;
             line-height: 1.3;
             text-align: justify;
@@ -288,7 +293,7 @@
                 <button class="nav-tab active" onclick="switchPage('page1', event)">1. Console</button>
                 <button class="nav-tab" onclick="switchPage('page2', event)">2. Map</button>
                 <button class="nav-tab" onclick="switchPage('page3', event)">3. LE Portal</button>
-                <button class="nav-tab" onclick="switchPage('page4', event)">4. Active Shooter</button>
+                <button class="nav-tab" onclick="switchPage('page4', event)">4. Shooter</button>
                 <button class="nav-tab" onclick="switchPage('page5', event)">5. Bus Track</button>
             </div>
 
@@ -361,14 +366,21 @@
             <div id="page4" class="page-content">
                 <div class="module-card">
                     <h3>Active Shooter Threat Vector</h3>
-                    <p>Isolate campus sector zones and assign threat zones to console.</p>
-                    <button class="action-btn" onclick="assignNodeNumber('Zone Alpha Lockdown (East Wing)')">Assign Zone Alpha</button>
-                    <button class="action-btn" style="background:rgba(255,51,51,0.25); border-color:var(--emergency-red); color:#ff6666; margin-top:6px;" onclick="triggerLockdown()">Initiate Campus Lockdown</button>
+                    <p>Isolate campus sectors or trigger building-wide lockdown protocols.</p>
+                    
+                    <div class="grid-options">
+                        <button class="action-btn" onclick="assignNodeNumber('Zone Alpha (East Wing)')">Zone Alpha</button>
+                        <button class="action-btn" onclick="assignNodeNumber('Zone Bravo (West Cafeteria)')">Zone Bravo</button>
+                        <button class="action-btn" onclick="assignNodeNumber('Zone Charlie (Gymnasium)')">Zone Charlie</button>
+                        <button class="action-btn" onclick="assignNodeNumber('Zone Delta (Admin/Main)')">Zone Delta</button>
+                    </div>
+
+                    <button class="action-btn" style="background:rgba(255,51,51,0.25); border-color:var(--emergency-red); color:#ff6666; margin-top:12px;" onclick="triggerLockdown()">Initiate Campus Lockdown</button>
                 </div>
                 <div class="location-box" id="lockdownStatus">
-                    <strong>Zone Status:</strong> Normal Operations<br>
-                    <strong>Perimeter Gates:</strong> Closed & Monitored<br>
-                    <strong>Responder Routing:</strong> Standby
+                    <strong>Threat Status:</strong> Standard Operations<br>
+                    <strong>Perimeter Gates:</strong> Normal / Monitoring<br>
+                    <strong>Responder Vectors:</strong> Standby
                 </div>
             </div>
 
@@ -376,13 +388,19 @@
             <div id="page5" class="page-content">
                 <div class="module-card">
                     <h3>School Bus Fleet Telemetry</h3>
-                    <p>Select specific bus fleet unit numbers to track from console.</p>
-                    <button class="action-btn" onclick="assignNodeNumber('School Bus Unit #14')">Track Bus Unit #14</button>
-                    <button class="action-btn" onclick="assignNodeNumber('School Bus Unit #22')" style="margin-top:6px;">Track Bus Unit #22</button>
+                    <p>Select specific bus fleet units to bind telemetry feed to console.</p>
+                    
+                    <div class="grid-options">
+                        <button class="action-btn" onclick="trackBus('School Bus Unit #14', 'Route 29 North Corridor', 'Central High Campus (ETA 4 Mins)', '42.8 mph')">Bus #14</button>
+                        <button class="action-btn" onclick="trackBus('School Bus Unit #22', 'Route 460 East Link', 'Middle School South (ETA 7 Mins)', '38.2 mph')">Bus #22</button>
+                        <button class="action-btn" onclick="trackBus('School Bus Unit #09', 'Old Lynchburg Road', 'Elementary North (ETA 2 Mins)', '15.4 mph')">Bus #09</button>
+                        <button class="action-btn" onclick="trackBus('School Bus Unit #88 (Spare)', 'Bus Depot Lot B', 'Standby / Maintenance', '0.0 mph')">Bus #88</button>
+                    </div>
                 </div>
-                <div class="location-box">
-                    <strong>Bus Fleet:</strong> Unit #14 (En Route)<br>
-                    <strong>Location:</strong> Route 29 North Corridor<br>
+                <div class="location-box" id="busStatusBox">
+                    <strong>Active Bus:</strong> Unit #14 (En Route)<br>
+                    <strong>Corridor:</strong> Route 29 North Corridor<br>
+                    <strong>Speed:</strong> 42.8 mph<br>
                     <strong>Next Stop:</strong> Central High Campus (ETA 4 Mins)
                 </div>
             </div>
@@ -397,7 +415,7 @@
         </div>
     </div>
 
-    <!-- LOCAL STANDALONE SYSTEM LOGIC WITH FILL ANIMATION -->
+    <!-- LOCAL STANDALONE SYSTEM LOGIC -->
     <script>
         let currentAssignment = "Classroom 204 (Level 2)";
         let holdTimer;
@@ -410,7 +428,7 @@
                 currentAssignment = lastAssignment;
                 document.getElementById('consoleActiveAssignment').textContent = currentAssignment;
             }
-            console.log("TACNET School initialized in local standalone mode.");
+            console.log("TACNET School initialized with expanded tactical modules.");
         }
 
         function assignNodeNumber(identifier) {
@@ -421,6 +439,20 @@
             const log = document.getElementById('statusLog');
             log.style.color = '#ffd700';
             log.innerHTML = `<strong>NODE ASSIGNED:</strong> Console updated to track <strong>${identifier}</strong>.`;
+        }
+
+        function trackBus(unitName, corridor, nextStop, speed) {
+            assignNodeNumber(unitName);
+            const busBox = document.getElementById('busStatusBox');
+            busBox.innerHTML = `
+                <strong>Active Bus:</strong> ${unitName}<br>
+                <strong>Corridor:</strong> ${corridor}<br>
+                <strong>Speed:</strong> ${speed}<br>
+                <strong>Next Stop:</strong> ${nextStop}
+            `;
+            const log = document.getElementById('statusLog');
+            log.style.color = '#ffd700';
+            log.innerHTML = `<strong>BUS TELEMETRY BOUND:</strong> Tracking <strong>${unitName}</strong> along ${corridor}.`;
         }
 
         function switchPage(pageId, evt) {
@@ -455,20 +487,16 @@
             btn.style.boxShadow = "0 0 35px rgba(255, 51, 51, 0.9)";
 
             let startTime = Date.now();
-            let duration = 3000; // 3 seconds
+            let duration = 3000;
 
             animationInterval = setInterval(() => {
                 let elapsed = Date.now() - startTime;
                 let progress = (elapsed / duration) * 100;
                 
-                if (progress >= 100) {
-                    progress = 100;
-                }
+                if (progress >= 100) progress = 100;
 
-                // Expand fill width from left to right across the button
                 fill.style.width = `${progress}%`;
 
-                // Update text counter
                 let secondsLeft = Math.ceil((duration - elapsed) / 1000);
                 if (secondsLeft > 0) {
                     countdownText.textContent = `${secondsLeft}s LEFT`;
@@ -493,7 +521,6 @@
             clearTimeout(holdTimer);
             clearInterval(animationInterval);
 
-            // Reset fill width and button text
             const fill = document.getElementById('panicFill');
             fill.style.width = '0%';
             document.getElementById('countdownText').textContent = "BROADCAST";
@@ -560,12 +587,12 @@
             const lockdownBox = document.getElementById('lockdownStatus');
             lockdownBox.innerHTML = `
                 <strong style="color:#ff3333;">CAMPUS LOCKDOWN ENGAGED:</strong><br>
-                <strong>Target:</strong> ${currentAssignment}<br>
-                <strong>Command Sent:</strong> Strobe & Audio Alarms Activated
+                <strong>Target Sector:</strong> ${currentAssignment}<br>
+                <strong>Status:</strong> Strobe & Audio Alarms Active
             `;
             const log = document.getElementById('statusLog');
             log.style.color = '#ff3333';
-            log.innerHTML = `<strong>LOCKDOWN:</strong> Campus security protocol initiated for ${currentAssignment}.`;
+            log.innerHTML = `<strong>LOCKDOWN:</strong> Campus-wide security lockdown active for ${currentAssignment}.`;
         }
     </script>
 </body>
