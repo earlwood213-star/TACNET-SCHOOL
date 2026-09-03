@@ -40,9 +40,10 @@
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             border: 2px solid var(--gold-border);
+            /* Double gold pinstripe effect using layered box-shadows */
+            box-shadow: 0 0 0 3px var(--royal-blue), 0 0 0 5px var(--gold-border), 0 8px 32px 0 rgba(0, 0, 0, 0.45), inset 0 0 20px rgba(255, 215, 0, 0.15);
             border-radius: 16px;
             padding: 24px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45), inset 0 0 20px rgba(255, 215, 0, 0.15);
             max-height: 85vh;
             overflow-y: auto;
         }
@@ -120,7 +121,6 @@
             box-shadow: 0 0 15px rgba(255, 51, 51, 0.8);
         }
 
-        /* Green Rectangle Bypass Button (Wider than the 140px red button) */
         .bypass-section {
             text-align: center;
             margin-bottom: 20px;
