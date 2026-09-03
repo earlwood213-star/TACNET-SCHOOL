@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TACNET SCHOOL - Dynamic Sync Master</title>
+    <title>TACNET SCHOOL - CloudKit Master System</title>
+    <!-- Apple CloudKit JS SDK -->
     <script src="https://cdn.apple-cloudkit.com/ck/2/cloudkit.js"></script>
     <style>
         :root {
@@ -278,6 +279,7 @@
                 <span class="badge">PAT PENDING</span>
             </div>
 
+            <!-- PAGE 1: EMERGENCY CONSOLE -->
             <div id="page1" class="page-content active">
                 <div class="location-box">
                     <strong>Active Node / Assignment:</strong> <span id="consoleActiveAssignment" style="color:var(--gold-text);">Classroom 204 (Level 2)</span><br>
@@ -306,6 +308,7 @@
                 </div>
             </div>
 
+            <!-- PAGE 2: INDOOR MAP & ELEVATION -->
             <div id="page2" class="page-content">
                 <div class="module-card">
                     <h3>Spatial Mapping & Elevation</h3>
@@ -321,6 +324,7 @@
                 </div>
             </div>
 
+            <!-- PAGE 3: LAW ENFORCEMENT & ADMIN RESPONDER PORTAL -->
             <div id="page3" class="page-content">
                 <div class="module-card">
                     <h3>LE / Admin Live Responder Feed</h3>
@@ -334,6 +338,7 @@
                 </div>
             </div>
 
+            <!-- PAGE 4: ACTIVE SHOOTER MODULE -->
             <div id="page4" class="page-content">
                 <div class="module-card">
                     <h3>Active Shooter Threat Vector</h3>
@@ -348,6 +353,7 @@
                 </div>
             </div>
 
+            <!-- PAGE 5: SCHOOL BUS TRACKING MODULE -->
             <div id="page5" class="page-content">
                 <div class="module-card">
                     <h3>School Bus Fleet Telemetry</h3>
@@ -372,6 +378,7 @@
         </div>
     </div>
 
+    <!-- APPLE CLOUDKIT JS LOGIC & DYNAMIC BINDING -->
     <script>
         let mediaStream = null;
         let mediaRecorder = null;
@@ -380,20 +387,22 @@
         let currentAssignment = "Classroom 204 (Level 2)";
 
         async function initSystem() {
+            // Initialize Apple CloudKit JS container framework safely
             try {
                 if (typeof CloudKit !== 'undefined') {
                     CloudKit.configure({
                         containers: [{
                             containerIdentifier: 'iCloud.com.earlwood.tacnetschool',
                             apiToken: 'YOUR_PUBLIC_CLOUD_KIT_API_TOKEN',
-                            environment: 'development'
+                            environment: 'development' // Switches to 'production' upon live deployment
                         }]
                     });
                     const container = CloudKit.getDefaultContainer();
                     publicDatabase = container.publicCloudDatabase;
+                    console.log("Apple CloudKit initialized successfully.");
                 }
             } catch (e) {
-                console.warn("CloudKit pending credentials setup:", e);
+                console.warn("CloudKit pending credentials configuration:", e);
             }
 
             try {
@@ -445,8 +454,8 @@
                     }
                 };
 
-                await publicDatabase.saveRecords([alertRecord]);
-                console.log("Emergency synced to CloudKit with assignment:", currentAssignment);
+                const response = await publicDatabase.saveRecords([alertRecord]);
+                console.log("Emergency successfully synced to Apple CloudKit:", response);
             } catch (error) {
                 console.error("CloudKit sync error:", error);
             }
@@ -530,7 +539,7 @@
             log.innerHTML = `<strong>ALERT TRANSMITTING:</strong> Audio stream packetized for <strong>${currentAssignment}</strong>.`;
             
             setTimeout(() => {
-                log.innerHTML = `<strong>BROADCAST SENT:</strong> Cloud relay updated for <strong>${currentAssignment}</strong>.`;
+                log.innerHTML = `<strong>BROADCAST SENT:</strong> Apple CloudKit relay updated for <strong>${currentAssignment}</strong>.`;
             }, 1500);
         }
 
