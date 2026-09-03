@@ -133,29 +133,61 @@
         .panic-section {
             text-align: center;
             margin: 20px 0 10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Container for the button and visual countdown ring */
+        .panic-wrapper {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Circular progress bar behind the button */
+        .progress-ring {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.1s linear;
+            stroke: var(--emergency-red);
+            stroke-width: 6;
+            stroke-linecap: round;
+            fill: transparent;
         }
 
         .panic-btn {
-            width: 130px;
-            height: 130px;
+            position: relative;
+            width: 126px;
+            height: 126px;
             border-radius: 50%;
             background: radial-gradient(circle, #ff6666 0%, var(--emergency-red) 100%);
             border: 4px solid var(--gold-border);
             color: white;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 0 25px rgba(255, 51, 51, 0.6);
             outline: none;
             user-select: none;
+            z-index: 2;
         }
 
         .hold-reminder {
             font-size: 0.6rem;
             color: #ffffff;
-            margin-top: 6px;
+            margin-top: 8px;
             text-transform: uppercase;
             opacity: 0.85;
+            letter-spacing: 0.5px;
         }
 
         .bypass-section {
@@ -285,15 +317,21 @@
                 </div>
 
                 <div class="panic-section">
-                    <button class="panic-btn" 
-                        id="panicBtn"
-                        onmousedown="startHold(event)" 
-                        onmouseup="cancelHold(event)" 
-                        ontouchstart="startHold(event)" 
-                        ontouchend="cancelHold(event)">
-                        EMERGENCY<br>BROADCAST
-                    </button>
-                    <div class="hold-reminder">Hold 3 Seconds</div>
+                    <div class="panic-wrapper">
+                        <!-- SVG Progress Ring for Hold Animation -->
+                        <svg class="progress-ring" width="140" height="140">
+                            <circle class="progress-ring__circle" stroke-dasharray="377" stroke-dashoffset="377" cx="70" cy="70" r="60"/>
+                        </svg>
+                        <button class="panic-btn" 
+                            id="panicBtn"
+                            onmousedown="startHold(event)" 
+                            onmouseup="cancelHold(event)" 
+                            ontouchstart="startHold(event)" 
+                            ontouchend="cancelHold(event)">
+                            EMERGENCY<br><span id="countdownText" style="font-size:0.75rem;">BROADCAST</span>
+                        </button>
+                    </div>
+                    <div class="hold-reminder" id="holdInstruction">Hold 3 Seconds</div>
                 </div>
 
                 <div class="bypass-section" style="margin-top: 15px;">
@@ -376,9 +414,14 @@
         </div>
     </div>
 
-    <!-- LOCAL STANDALONE SYSTEM LOGIC -->
+    <!-- LOCAL STANDALONE SYSTEM LOGIC WITH HOLD ANIMATION -->
     <script>
         let currentAssignment = "Classroom 204 (Level 2)";
+        let holdTimer;
+        let animationInterval;
+        let isHolding = false;
+        
+        const CIRCLE_CIRCUMFERENCE = 377; // 2 * pi * r (r=60)
 
         function initSystem() {
             const lastAssignment = localStorage.getItem('tacnet_last_assignment');
@@ -386,6 +429,11 @@
                 currentAssignment = lastAssignment;
                 document.getElementById('consoleActiveAssignment').textContent = currentAssignment;
             }
+            
+            const circle = document.querySelector('.progress-ring__circle');
+            circle.style.strokeDasharray = CIRCLE_CIRCUMFERENCE;
+            circle.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE;
+            
             console.log("TACNET School initialized in local standalone mode.");
         }
 
@@ -416,9 +464,6 @@
             fs.innerHTML = `<strong>Active View:</strong> Level ${level} Blueprint<br><strong>Grid Polygon:</strong> Sector B-${level === 2 ? 'East (Classroom 204)' : 'West (Main Hall)'}`;
         }
 
-        let holdTimer;
-        let isHolding = false;
-
         function startHold(e) {
             e.preventDefault();
             if (isHolding) return;
@@ -426,9 +471,41 @@
 
             const log = document.getElementById('statusLog');
             const btn = document.getElementById('panicBtn');
+            const countdownText = document.getElementById('countdownText');
+            const holdInstruction = document.getElementById('holdInstruction');
+            const circle = document.querySelector('.progress-ring__circle');
+
             log.style.color = '#ffd700';
             log.innerHTML = `<strong>HOLDING...</strong> Transmitting alert for <strong>${currentAssignment}</strong>.`;
             btn.style.boxShadow = "0 0 35px rgba(255, 51, 51, 0.9)";
+
+            let startTime = Date.now();
+            let duration = 3000; // 3 seconds
+
+            animationInterval = setInterval(() => {
+                let elapsed = Date.now() - startTime;
+                let progress = elapsed / duration;
+                
+                if (progress >= 1) {
+                    progress = 1;
+                }
+
+                // Update SVG circle stroke offset
+                let offset = CIRCLE_CIRCUMFERENCE - (progress * CIRCLE_CIRCUMFERENCE);
+                circle.style.strokeDashoffset = offset;
+
+                // Update visual countdown numbers on button face
+                let secondsLeft = Math.ceil((duration - elapsed) / 1000);
+                if (secondsLeft > 0) {
+                    countdownText.textContent = `${secondsLeft}s LEFT`;
+                } else {
+                    countdownText.textContent = `SENDING`;
+                }
+
+                if (elapsed >= duration) {
+                    clearInterval(animationInterval);
+                }
+            }, 50);
 
             holdTimer = setTimeout(() => {
                 triggerEmergency();
@@ -440,6 +517,12 @@
             if (!isHolding) return;
             isHolding = false;
             clearTimeout(holdTimer);
+            clearInterval(animationInterval);
+
+            // Reset visual ring and button text
+            const circle = document.querySelector('.progress-ring__circle');
+            circle.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE;
+            document.getElementById('countdownText').textContent = "BROADCAST";
 
             const btn = document.getElementById('panicBtn');
             btn.style.boxShadow = "0 0 25px rgba(255, 51, 51, 0.6)";
@@ -453,17 +536,22 @@
 
         function triggerEmergency() {
             isHolding = false;
+            clearInterval(animationInterval);
             
+            const circle = document.querySelector('.progress-ring__circle');
+            circle.style.strokeDashoffset = 0; // Fully filled ring
+
             const log = document.getElementById('statusLog');
             const btn = document.getElementById('panicBtn');
             const nodeStatus = document.getElementById('nodeStatusText');
+            const countdownText = document.getElementById('countdownText');
             
+            countdownText.textContent = "ACTIVE";
             btn.style.boxShadow = "0 0 40px rgba(255, 51, 51, 1)";
             log.style.color = '#ff3333';
             nodeStatus.style.color = '#ff3333';
             nodeStatus.textContent = "EMERGENCY BROADCAST ACTIVE";
             
-            // Save emergency event locally
             const alertRecord = {
                 nodeName: currentAssignment,
                 timestamp: new Date().toISOString(),
@@ -476,7 +564,12 @@
 
         function triggerBypass() {
             clearTimeout(holdTimer);
+            clearInterval(animationInterval);
             isHolding = false;
+
+            const circle = document.querySelector('.progress-ring__circle');
+            circle.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE;
+            document.getElementById('countdownText').textContent = "BROADCAST";
 
             const log = document.getElementById('statusLog');
             const nodeStatus = document.getElementById('nodeStatusText');
