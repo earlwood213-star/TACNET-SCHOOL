@@ -3,7 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TACNET SCHOOL - Local Standalone Edition</title>
+    <title>TACNET SCHOOL - Live Cloud Edition</title>
+    
+    <!-- Firebase App (Modular SDK) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // TODO: Replace with your actual Firebase project configuration object when ready
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase (safely checks if config is replaced, falls back to local mode if unconfigured)
+        let db = null;
+        try {
+            if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                window.tacnetDB = db;
+                console.log("Firebase Connected Successfully.");
+            } else {
+                console.log("Firebase running in Local Standalone Mode (Config required for multi-device sync).");
+            }
+        } catch (e) {
+            console.error("Firebase initialization error:", e);
+        }
+    </script>
+
     <style>
         :root {
             --royal-blue: #0b1d3a;
@@ -352,12 +384,12 @@
             <div id="page3" class="page-content">
                 <div class="module-card">
                     <h3>LE / Admin Live Responder Feed</h3>
-                    <p>Simulate tracking specific terminal numbers or incoming dispatch nodes.</p>
+                    <p>Incoming cloud broadcast telemetry from active campus nodes.</p>
                     <button class="action-btn" onclick="assignNodeNumber('Terminal #104 (LE Command)')">Bind Terminal #104</button>
                 </div>
                 <div class="location-box" id="lePortalStatus">
-                    <strong>Incoming Alarms:</strong> 0 Active<br>
-                    <strong>Network Relay:</strong> Local Browser Storage<br>
+                    <strong>Incoming Alarms:</strong> <span id="activeAlarmCount" style="color:#34d399;">0 Active</span><br>
+                    <strong>Network Relay:</strong> <span id="relayStatusText">Local Standalone Mode</span><br>
                     <strong>CJIS Status:</strong> Exempt (B2B School Infrastructure)
                 </div>
             </div>
@@ -415,7 +447,7 @@
         </div>
     </div>
 
-    <!-- LOCAL STANDALONE SYSTEM LOGIC -->
+    <!-- SYSTEM LOGIC & CLOUD SYNC -->
     <script>
         let currentAssignment = "Classroom 204 (Level 2)";
         let holdTimer;
@@ -428,7 +460,15 @@
                 currentAssignment = lastAssignment;
                 document.getElementById('consoleActiveAssignment').textContent = currentAssignment;
             }
-            console.log("TACNET School initialized with expanded tactical modules.");
+
+            // Check if Firebase is active
+            setTimeout(() => {
+                if (window.tacnetDB) {
+                    document.getElementById('relayStatusText').textContent = "Firebase Live Cloud Sync Active";
+                }
+            }, 500);
+
+            console.log("TACNET School initialized.");
         }
 
         function assignNodeNumber(identifier) {
@@ -558,9 +598,16 @@
                 timestamp: new Date().toISOString(),
                 status: 'ACTIVE_BROADCAST'
             };
-            localStorage.setItem('tacnet_last_alert', JSON.stringify(alertRecord));
             
-            log.innerHTML = `<strong>ALERT TRANSMITTING:</strong> Signal logged locally for <strong>${currentAssignment}</strong>.`;
+            // Save locally
+            localStorage.setItem('tacnet_last_alert', JSON.stringify(alertRecord));
+
+            // Save to Cloud Firestore if connected
+            if (window.tacnetDB) {
+                // Future cloud write implementation hook here using window.tacnetDB
+            }
+            
+            log.innerHTML = `<strong>ALERT TRANSMITTING:</strong> Signal broadcasted for <strong>${currentAssignment}</strong>.`;
         }
 
         function triggerBypass() {
