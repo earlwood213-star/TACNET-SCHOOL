@@ -98,6 +98,7 @@
         .panic-section {
             text-align: center;
             margin: 25px 0 15px 0;
+            position: relative;
         }
 
         .panic-btn {
@@ -113,11 +114,21 @@
             box-shadow: 0 0 30px rgba(255, 51, 51, 0.6);
             transition: transform 0.1s ease, box-shadow 0.1s ease;
             outline: none;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .panic-btn:active {
             transform: scale(0.95);
-            box-shadow: 0 0 15px rgba(255, 51, 51, 0.8);
+        }
+
+        .hold-reminder {
+            font-size: 0.65rem;
+            color: #ffffff;
+            margin-top: 8px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            opacity: 0.85;
         }
 
         .bypass-section {
@@ -148,7 +159,6 @@
             color: #ffffff;
         }
 
-        /* Scan Code Section */
         .qr-section {
             text-align: center;
             background: rgba(11, 29, 58, 0.6);
@@ -215,7 +225,16 @@
             </div>
 
             <div class="panic-section">
-                <button class="panic-btn" onclick="triggerEmergency()">EMERGENCY<br>BROADCAST</button>
+                <!-- Added touch and mouse hold handlers for 3-second activation -->
+                <button class="panic-btn" 
+                    id="panicBtn"
+                    onmousedown="startHold(event)" 
+                    onmouseup="cancelHold(event)" 
+                    ontouchstart="startHold(event)" 
+                    ontouchend="cancelHold(event)">
+                    EMERGENCY<br>BROADCAST
+                </button>
+                <div class="hold-reminder">Hold 3 Seconds</div>
             </div>
 
             <div class="bypass-section">
@@ -224,12 +243,11 @@
 
             <div class="qr-section">
                 <div class="qr-title">Scan to Connect / Join Node Network</div>
-                <!-- Generates a functional QR code pointing to your app/GitHub link -->
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://github.com/earlwood" alt="TACNET School QR Scan Code" class="qr-code">
             </div>
 
             <div class="status-log" id="statusLog">
-                System online. Tap red button above to initiate broadcast, or green bypass to clear status.
+                System online. Press and hold red button for 3 seconds to initiate broadcast.
             </div>
 
             <div class="disclaimer">
@@ -239,10 +257,50 @@
     </div>
 
     <script>
-        function triggerEmergency() {
+        let holdTimer;
+        let isHolding = false;
+
+        function startHold(e) {
+            e.preventDefault();
+            if (isHolding) return;
+            isHolding = true;
+
             const log = document.getElementById('statusLog');
-            log.style.color = '#ff6666';
-            log.innerHTML = "<strong>ALERT TRANSMITTING:</strong> Capturing media, locking coordinates, and broadcasting to network nodes...";
+            const btn = document.getElementById('panicBtn');
+            log.style.color = '#ffd700';
+            log.innerHTML = "<strong>HOLDING...</strong> Keep holding red button for 3 seconds to transmit alert.";
+            btn.style.boxShadow = "0 0 45px rgba(255, 51, 51, 0.9)";
+
+            // 3-second countdown timer
+            holdTimer = setTimeout(() => {
+                triggerEmergency();
+            }, 3000);
+        }
+
+        function cancelHold(e) {
+            e.preventDefault();
+            if (!isHolding) return;
+            isHolding = false;
+            clearTimeout(holdTimer);
+
+            const btn = document.getElementById('panicBtn');
+            btn.style.boxShadow = "0 0 30px rgba(255, 51, 51, 0.6)";
+
+            const log = document.getElementById('statusLog');
+            // If it wasn't triggered yet, reset log
+            if (log.style.color !== 'rgb(255, 51, 51)') {
+                log.style.color = '#e0f7ff';
+                log.innerHTML = "System online. Press and hold red button for 3 seconds to initiate broadcast.";
+            }
+        }
+
+        function triggerEmergency() {
+            isHolding = false;
+            const log = document.getElementById('statusLog');
+            const btn = document.getElementById('panicBtn');
+            btn.style.boxShadow = "0 0 50px rgba(255, 51, 51, 1)";
+            log.style.color = '#ff3333';
+            log.innerHTML = "<strong>ALERT TRANSMITTING:</strong> 3-second hold confirmed. Capturing media, locking coordinates, and broadcasting...";
             
             setTimeout(() => {
                 log.innerHTML = "<strong>BROADCAST SENT:</strong> Audio/Photo dispatched to cloud secure relay and LE portal.";
@@ -250,6 +308,8 @@
         }
 
         function triggerBypass() {
+            clearTimeout(holdTimer);
+            isHolding = false;
             const log = document.getElementById('statusLog');
             log.style.color = '#34d399';
             log.innerHTML = "<strong>STATUS VERIFIED:</strong> All OK. Room confirmed secure and bypass signal sent to network.";
