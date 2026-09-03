@@ -40,11 +40,10 @@
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             border: 2px solid var(--gold-border);
-            /* Double gold pinstripe effect using layered box-shadows */
             box-shadow: 0 0 0 3px var(--royal-blue), 0 0 0 5px var(--gold-border), 0 8px 32px 0 rgba(0, 0, 0, 0.45), inset 0 0 20px rgba(255, 215, 0, 0.15);
             border-radius: 16px;
             padding: 24px;
-            max-height: 85vh;
+            max-height: 90vh;
             overflow-y: auto;
         }
 
@@ -149,6 +148,34 @@
             color: #ffffff;
         }
 
+        /* Scan Code Section */
+        .qr-section {
+            text-align: center;
+            background: rgba(11, 29, 58, 0.6);
+            border: 1px solid var(--gold-border);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .qr-title {
+            font-size: 0.75rem;
+            color: var(--gold-text);
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .qr-code {
+            width: 110px;
+            height: 110px;
+            border-radius: 4px;
+            border: 2px solid #ffffff;
+            background: #ffffff;
+            padding: 4px;
+        }
+
         .status-log {
             font-size: 0.85rem;
             background: rgba(0,0,0,0.3);
@@ -193,6 +220,12 @@
 
             <div class="bypass-section">
                 <button class="bypass-btn" onclick="triggerBypass()">ALL OK GOOD SECURE BYPASS</button>
+            </div>
+
+            <div class="qr-section">
+                <div class="qr-title">Scan to Connect / Join Node Network</div>
+                <!-- Generates a functional QR code pointing to your app/GitHub link -->
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://github.com/earlwood" alt="TACNET School QR Scan Code" class="qr-code">
             </div>
 
             <div class="status-log" id="statusLog">
