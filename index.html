@@ -1,125 +1,180 @@
-:root {
-    --royal-blue: #0b1d3a;
-    --neon-blue: #00f0ff;
-    --glass-bg: rgba(0, 240, 255, 0.05);
-    --glass-border: rgba(0, 240, 255, 0.3);
-    --emergency-red: #ff3333;
-    --text-light: #e0f7ff;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TACNET School - Emergency Broadcast</title>
+    <style>
+        :root {
+            --royal-blue: #0b1d3a;
+            --neon-blue: #00f0ff;
+            --glass-bg: rgba(0, 240, 255, 0.05);
+            --glass-border: rgba(0, 240, 255, 0.3);
+            --emergency-red: #ff3333;
+            --text-light: #e0f7ff;
+        }
 
-body {
-    margin: 0;
-    padding: 0;
-    background-color: var(--royal-blue);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: var(--text-light);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-}
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--royal-blue);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-.container {
-    width: 100%;
-    max-width: 480px;
-    padding: 20px;
-    box-sizing: border-box;
-}
+        .container {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
 
-.glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 0 15px rgba(0, 240, 255, 0.1);
-    max-height: 85vh;
-    overflow-y: auto;
-}
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 0 15px rgba(0, 240, 255, 0.1);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
 
-h1 {
-    font-size: 1.4rem;
-    text-align: center;
-    margin-bottom: 4px;
-    color: var(--neon-blue);
-    text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
-    letter-spacing: 1px;
-}
+        h1 {
+            font-size: 1.4rem;
+            text-align: center;
+            margin-bottom: 4px;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+            letter-spacing: 1px;
+        }
 
-.subtitle {
-    font-size: 0.8rem;
-    text-align: center;
-    color: #8ab4f8;
-    margin-bottom: 16px;
-    text-transform: uppercase;
-}
+        .subtitle {
+            font-size: 0.8rem;
+            text-align: center;
+            color: #8ab4f8;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
 
-.badge-row {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
+        .badge-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
 
-.badge {
-    font-size: 0.7rem;
-    background: rgba(0, 240, 255, 0.1);
-    border: 1px solid var(--neon-blue);
-    padding: 4px 8px;
-    border-radius: 4px;
-    color: var(--neon-blue);
-}
+        .badge {
+            font-size: 0.65rem;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--neon-blue);
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: var(--neon-blue);
+            text-align: center;
+        }
 
-.location-box {
-    background: rgba(11, 29, 58, 0.6);
-    border: 1px solid var(--glass-border);
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-size: 0.9rem;
-}
+        .location-box {
+            background: rgba(11, 29, 58, 0.6);
+            border: 1px solid var(--glass-border);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
 
-.panic-section {
-    text-align: center;
-    margin: 30px 0;
-}
+        .panic-section {
+            text-align: center;
+            margin: 30px 0;
+        }
 
-.panic-btn {
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    background: radial-gradient(circle, #ff6666 0%, var(--emergency-red) 100%);
-    border: 4px solid #fff;
-    color: white;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 0 30px rgba(255, 51, 51, 0.6);
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-    outline: none;
-}
+        .panic-btn {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ff6666 0%, var(--emergency-red) 100%);
+            border: 4px solid #fff;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(255, 51, 51, 0.6);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            outline: none;
+        }
 
-.panic-btn:active {
-    transform: scale(0.95);
-    box-shadow: 0 0 15px rgba(255, 51, 51, 0.8);
-}
+        .panic-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.8);
+        }
 
-.status-log {
-    font-size: 0.85rem;
-    background: rgba(0,0,0,0.2);
-    padding: 10px;
-    border-radius: 6px;
-    min-height: 40px;
-    margin-bottom: 20px;
-    border-left: 3px solid var(--neon-blue);
-}
+        .status-log {
+            font-size: 0.85rem;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 6px;
+            min-height: 40px;
+            margin-bottom: 20px;
+            border-left: 3px solid var(--neon-blue);
+        }
 
-.disclaimer {
-    font-size: 0.65rem;
-    color: #9aa0a6;
-    line-height: 1.3;
-    text-align: justify;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    padding-top: 12px;
-}
+        .disclaimer {
+            font-size: 0.65rem;
+            color: #9aa0a6;
+            line-height: 1.3;
+            text-align: justify;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="glass-card">
+            <h1>TACNET School</h1>
+            <div class="subtitle">One Step Ahead</div>
+            
+            <div class="badge-row">
+                <span class="badge">EARL A. WOOD, RET. DEPUTY</span>
+                <span class="badge">PAT PENDING</span>
+            </div>
+
+            <div class="location-box" id="locationInfo">
+                <strong>Assigned Node:</strong> Classroom 204 (Level 2)<br>
+                <strong>Status:</strong> Secure / Standby
+            </div>
+
+            <div class="panic-section">
+                <button class="panic-btn" onclick="triggerEmergency()">EMERGENCY<br>BROADCAST</button>
+            </div>
+
+            <div class="status-log" id="statusLog">
+                System online. Tap red button above to initiate campus-wide broadcast.
+            </div>
+
+            <div class="disclaimer">
+                <strong>DISCLAIMER:</strong> TACNET School is an auxiliary emergency notification and situational awareness tool designed to assist campus staff and first responders. It does not replace primary 911 emergency services, municipal public safety communications infrastructure, or statutory life-safety systems. The platform creator and operators assume no liability for network latency, carrier signal loss, hardware malfunction, or outcomes resulting from emergency deployments.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function triggerEmergency() {
+            const log = document.getElementById('statusLog');
+            log.style.color = '#ff6666';
+            log.innerHTML = "<strong>ALERT TRANSMITTING:</strong> Capturing media, locking coordinates, and broadcasting to network nodes...";
+            
+            setTimeout(() => {
+                log.innerHTML = "<strong>BROADCAST SENT:</strong> Audio/Photo dispatched to cloud secure relay and LE portal.";
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
