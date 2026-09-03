@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TACNET SCHOOL - CloudKit Master System</title>
-    <!-- Apple CloudKit JS SDK -->
+    <title>TACNET SCHOOL - Dynamic Sync Master</title>
     <script src="https://cdn.apple-cloudkit.com/ck/2/cloudkit.js"></script>
     <style>
         :root {
@@ -279,10 +278,9 @@
                 <span class="badge">PAT PENDING</span>
             </div>
 
-            <!-- PAGE 1: EMERGENCY CONSOLE -->
             <div id="page1" class="page-content active">
                 <div class="location-box">
-                    <strong>Assigned Node:</strong> Classroom 204 (Level 2)<br>
+                    <strong>Active Node / Assignment:</strong> <span id="consoleActiveAssignment" style="color:var(--gold-text);">Classroom 204 (Level 2)</span><br>
                     <strong>Status:</strong> <span id="nodeStatusText" style="color:#34d399;">Secure / Standby</span>
                 </div>
 
@@ -308,11 +306,10 @@
                 </div>
             </div>
 
-            <!-- PAGE 2: INDOOR MAP & ELEVATION -->
             <div id="page2" class="page-content">
                 <div class="module-card">
                     <h3>Spatial Mapping & Elevation</h3>
-                    <p>Bypasses lack of indoor GPS height data using pre-loaded building polygon grids.</p>
+                    <p>Select floor level to update active console target.</p>
                     <div style="display:flex; gap:8px; margin-top:10px;">
                         <button class="nav-tab active" style="flex:1;" onclick="setFloor(1)">Level 1</button>
                         <button class="nav-tab" style="flex:1;" onclick="setFloor(2)">Level 2</button>
@@ -324,12 +321,11 @@
                 </div>
             </div>
 
-            <!-- PAGE 3: LAW ENFORCEMENT & ADMIN RESPONDER PORTAL -->
             <div id="page3" class="page-content">
                 <div class="module-card">
                     <h3>LE / Admin Live Responder Feed</h3>
-                    <p>Free zero-cost auxiliary feed for local deputies and campus administration.</p>
-                    <button class="action-btn" onclick="simulateIncomingAlert()">Test Incoming Alert Feed</button>
+                    <p>Simulate tracking specific terminal numbers or incoming dispatch nodes.</p>
+                    <button class="action-btn" onclick="assignNodeNumber('Terminal #104 (LE Command)')">Bind Terminal #104</button>
                 </div>
                 <div class="location-box" id="lePortalStatus">
                     <strong>Incoming Alarms:</strong> 0 Active<br>
@@ -338,12 +334,12 @@
                 </div>
             </div>
 
-            <!-- PAGE 4: ACTIVE SHOOTER MODULE -->
             <div id="page4" class="page-content">
                 <div class="module-card">
                     <h3>Active Shooter Threat Vector</h3>
-                    <p>Real-time sector isolation and lockdown command distribution across campus zones.</p>
-                    <button class="action-btn" style="background:rgba(255,51,51,0.25); border-color:var(--emergency-red); color:#ff6666;" onclick="triggerLockdown()">Initiate Campus Lockdown</button>
+                    <p>Isolate campus sector zones and assign threat zones to console.</p>
+                    <button class="action-btn" onclick="assignNodeNumber('Zone Alpha Lockdown (East Wing)')">Assign Zone Alpha</button>
+                    <button class="action-btn" style="background:rgba(255,51,51,0.25); border-color:var(--emergency-red); color:#ff6666; margin-top:6px;" onclick="triggerLockdown()">Initiate Campus Lockdown</button>
                 </div>
                 <div class="location-box" id="lockdownStatus">
                     <strong>Zone Status:</strong> Normal Operations<br>
@@ -352,11 +348,12 @@
                 </div>
             </div>
 
-            <!-- PAGE 5: SCHOOL BUS TRACKING MODULE -->
             <div id="page5" class="page-content">
                 <div class="module-card">
                     <h3>School Bus Fleet Telemetry</h3>
-                    <p>Live route tracking and geofence arrival alerts for transportation coordinators.</p>
+                    <p>Select specific bus fleet unit numbers to track from console.</p>
+                    <button class="action-btn" onclick="assignNodeNumber('School Bus Unit #14')">Track Bus Unit #14</button>
+                    <button class="action-btn" onclick="assignNodeNumber('School Bus Unit #22')" style="margin-top:6px;">Track Bus Unit #22</button>
                 </div>
                 <div class="location-box">
                     <strong>Bus Fleet:</strong> Unit #14 (En Route)<br>
@@ -366,7 +363,7 @@
             </div>
 
             <div class="status-log" id="statusLog">
-                System online. Press and hold red button for 3 seconds to initiate broadcast.
+                System online. Select modules or numbers to bind assignment to console.
             </div>
 
             <div class="disclaimer">
@@ -375,15 +372,14 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT SYSTEM LOGIC -->
     <script>
         let mediaStream = null;
         let mediaRecorder = null;
         let audioChunks = [];
         let publicDatabase = null;
+        let currentAssignment = "Classroom 204 (Level 2)";
 
         async function initSystem() {
-            // Safely initialize CloudKit JS inside a try/catch so unconfigured API tokens won't cause a blank screen
             try {
                 if (typeof CloudKit !== 'undefined') {
                     CloudKit.configure({
@@ -395,10 +391,9 @@
                     });
                     const container = CloudKit.getDefaultContainer();
                     publicDatabase = container.publicCloudDatabase;
-                    console.log("CloudKit initialized successfully.");
                 }
             } catch (e) {
-                console.warn("CloudKit initialization pending credentials setup:", e);
+                console.warn("CloudKit pending credentials setup:", e);
             }
 
             try {
@@ -413,18 +408,21 @@
 
                 mediaRecorder.onstop = () => {
                     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    console.log("Audio emergency packet compiled:", audioBlob.size, "bytes");
-                    
-                    // If CloudKit database is active, save record here
                     if (publicDatabase) {
                         saveEmergencyToCloudKit(audioBlob);
                     }
                 };
-
-                console.log("Hardware microphone sensor armed and ready.");
             } catch (err) {
                 console.warn("Microphone access restricted or pending interaction:", err);
             }
+        }
+
+        function assignNodeNumber(identifier) {
+            currentAssignment = identifier;
+            document.getElementById('consoleActiveAssignment').textContent = currentAssignment;
+            const log = document.getElementById('statusLog');
+            log.style.color = '#ffd700';
+            log.innerHTML = `<strong>NODE ASSIGNED:</strong> Console updated to track <strong>${identifier}</strong>.`;
         }
 
         async function saveEmergencyToCloudKit(audioBlob) {
@@ -440,16 +438,15 @@
                 const alertRecord = {
                     recordType: 'EmergencyAlert',
                     fields: {
-                        nodeName: { value: 'Classroom 204' },
-                        floorLevel: { value: 2 },
+                        nodeName: { value: currentAssignment },
                         timestamp: { value: new Date().toISOString() },
                         status: { value: 'ACTIVE_BROADCAST' },
                         audioAsset: { value: asset }
                     }
                 };
 
-                const response = await publicDatabase.saveRecords([alertRecord]);
-                console.log("Emergency successfully synced to CloudKit:", response);
+                await publicDatabase.saveRecords([alertRecord]);
+                console.log("Emergency synced to CloudKit with assignment:", currentAssignment);
             } catch (error) {
                 console.error("CloudKit sync error:", error);
             }
@@ -464,6 +461,8 @@
         }
 
         function setFloor(level) {
+            const floorName = level === 2 ? "Classroom 204 (Level 2)" : "Main Hallway (Level 1)";
+            assignNodeNumber(floorName);
             const fs = document.getElementById('floorStatus');
             fs.innerHTML = `<strong>Active View:</strong> Level ${level} Blueprint<br><strong>Grid Polygon:</strong> Sector B-${level === 2 ? 'East (Classroom 204)' : 'West (Main Hall)'}`;
         }
@@ -479,7 +478,7 @@
             const log = document.getElementById('statusLog');
             const btn = document.getElementById('panicBtn');
             log.style.color = '#ffd700';
-            log.innerHTML = "<strong>HOLDING...</strong> Keep holding red button for 3 seconds to transmit alert.";
+            log.innerHTML = `<strong>HOLDING...</strong> Transmitting alert for <strong>${currentAssignment}</strong>.`;
             btn.style.boxShadow = "0 0 35px rgba(255, 51, 51, 0.9)";
 
             audioChunks = [];
@@ -508,7 +507,7 @@
             const log = document.getElementById('statusLog');
             if (log.style.color !== 'rgb(255, 51, 51)') {
                 log.style.color = '#e0f7ff';
-                log.innerHTML = "System online. Press and hold red button for 3 seconds to initiate broadcast.";
+                log.innerHTML = `System online. Current Target: <strong>${currentAssignment}</strong>.`;
             }
         }
 
@@ -528,10 +527,10 @@
             nodeStatus.style.color = '#ff3333';
             nodeStatus.textContent = "EMERGENCY BROADCAST ACTIVE";
             
-            log.innerHTML = "<strong>ALERT TRANSMITTING:</strong> Audio stream packetized & locked to Level 2 (Room 204).";
+            log.innerHTML = `<strong>ALERT TRANSMITTING:</strong> Audio stream packetized for <strong>${currentAssignment}</strong>.`;
             
             setTimeout(() => {
-                log.innerHTML = "<strong>BROADCAST SENT:</strong> Secure cloud relay and LE responder feed updated.";
+                log.innerHTML = `<strong>BROADCAST SENT:</strong> Cloud relay updated for <strong>${currentAssignment}</strong>.`;
             }, 1500);
         }
 
@@ -549,16 +548,15 @@
             log.style.color = '#34d399';
             nodeStatus.style.color = '#34d399';
             nodeStatus.textContent = "Secure / Standby";
-            log.innerHTML = "<strong>STATUS VERIFIED:</strong> All OK. Room confirmed secure and bypass signal sent.";
+            log.innerHTML = `<strong>STATUS VERIFIED:</strong> ${currentAssignment} confirmed secure.`;
         }
 
         function simulateIncomingAlert() {
             const portal = document.getElementById('lePortalStatus');
             portal.innerHTML = `
                 <strong style="color:#ff3333;">INCOMING ALERT ACTIVE:</strong><br>
-                <strong>Location:</strong> Classroom 204 (Level 2)<br>
+                <strong>Target:</strong> ${currentAssignment}<br>
                 <strong>Type:</strong> Emergency Broadcast Triggered<br>
-                <strong>Audio Stream:</strong> Ready (.webm buffer)<br>
                 <strong>Timestamp:</strong> Just Now
             `;
         }
@@ -567,13 +565,12 @@
             const lockdownBox = document.getElementById('lockdownStatus');
             lockdownBox.innerHTML = `
                 <strong style="color:#ff3333;">CAMPUS LOCKDOWN ENGAGED:</strong><br>
-                <strong>Sector:</strong> All Zones Isolated<br>
-                <strong>Command Sent:</strong> Strobe & Audio Alarms Activated<br>
-                <strong>Responder Route:</strong> En Route to Building Perimeter
+                <strong>Target:</strong> ${currentAssignment}<br>
+                <strong>Command Sent:</strong> Strobe & Audio Alarms Activated
             `;
             const log = document.getElementById('statusLog');
             log.style.color = '#ff3333';
-            log.innerHTML = "<strong>LOCKDOWN BROADCAST:</strong> Campus-wide security protocol initiated.";
+            log.innerHTML = `<strong>LOCKDOWN:</strong> Campus security protocol initiated for ${currentAssignment}.`;
         }
     </script>
 </body>
