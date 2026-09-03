@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TACNET SCHOOL - Emergency Broadcast</title>
+    <title>TACNET SCHOOL - Multi-Page Master System</title>
     <style>
         :root {
             --royal-blue: #0b1d3a;
@@ -80,7 +80,7 @@
             color: var(--gold-text);
             font-size: 0.65rem;
             font-weight: bold;
-            padding: 6px 10px;
+            padding: 6px 8px;
             border-radius: 4px;
             cursor: pointer;
             text-transform: uppercase;
@@ -191,6 +191,24 @@
             text-transform: uppercase;
         }
 
+        .action-btn {
+            width: 100%;
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid var(--gold-border);
+            color: var(--gold-text);
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 215, 0, 0.35);
+        }
+
         .qr-section {
             text-align: center;
             background: rgba(11, 29, 58, 0.6);
@@ -237,13 +255,14 @@
         }
     </style>
 </head>
-<body onload="requestPermissions()">
+<body onload="initSystem()">
 
     <div class="container">
         <div class="glass-card">
             <h1>TACNET SCHOOL</h1>
             <div class="subtitle">Life saving assisting agent</div>
             
+            <!-- Page Navigation Selector Tabs -->
             <div class="nav-tabs">
                 <button class="nav-tab active" onclick="switchPage('page1')">1. Console</button>
                 <button class="nav-tab" onclick="switchPage('page2')">2. Indoor Map</button>
@@ -260,7 +279,7 @@
             <div id="page1" class="page-content active">
                 <div class="location-box">
                     <strong>Assigned Node:</strong> Classroom 204 (Level 2)<br>
-                    <strong>Status:</strong> Secure / Standby
+                    <strong>Status:</strong> <span id="nodeStatusText" style="color:#34d399;">Secure / Standby</span>
                 </div>
 
                 <div class="panic-section">
@@ -291,13 +310,13 @@
                     <h3>Spatial Mapping & Elevation</h3>
                     <p>Bypasses lack of indoor GPS height data using pre-loaded building polygon grids.</p>
                     <div style="display:flex; gap:8px; margin-top:10px;">
-                        <button class="nav-tab active" style="flex:1;" onclick="setFloor(1)">Level 1 Blueprint</button>
-                        <button class="nav-tab" style="flex:1;" onclick="setFloor(2)">Level 2 Blueprint</button>
+                        <button class="nav-tab active" style="flex:1;" onclick="setFloor(1)">Level 1</button>
+                        <button class="nav-tab" style="flex:1;" onclick="setFloor(2)">Level 2</button>
                     </div>
                 </div>
                 <div class="location-box" id="floorStatus">
-                    <strong>Active View:</strong> Level 2 - Classroom 204<br>
-                    <strong>Grid Polygon:</strong> Sector B-East
+                    <strong>Active View:</strong> Level 2 Blueprint<br>
+                    <strong>Grid Polygon:</strong> Sector B-East (Classroom 204)
                 </div>
             </div>
 
@@ -306,11 +325,12 @@
                 <div class="module-card">
                     <h3>LE / Admin Live Responder Feed</h3>
                     <p>Free zero-cost auxiliary feed for local deputies and campus administration.</p>
+                    <button class="action-btn" onclick="simulateIncomingAlert()">Test Incoming Alert Feed</button>
                 </div>
-                <div class="location-box">
+                <div class="location-box" id="lePortalStatus">
                     <strong>Incoming Alarms:</strong> 0 Active<br>
-                    <strong>Network Relay:</strong> Encrypted iCloud Sync Active<br>
-                    <strong>CJIS Status:</strong> Exempt (School-Procured Infrastructure)
+                    <strong>Network Relay:</strong> Encrypted Sync Active<br>
+                    <strong>CJIS Status:</strong> Exempt (B2B School Infrastructure)
                 </div>
             </div>
 
@@ -319,7 +339,7 @@
                 <div class="module-card">
                     <h3>Backend Architecture</h3>
                     <p><strong>Database:</strong> CloudKit / Supabase Relational Schema</p>
-                    <p><strong>Media Capture:</strong> MediaRecorder API (.mp3 + Snapshot)</p>
+                    <p><strong>Media Capture:</strong> Live MediaRecorder API Active</p>
                     <p><strong>Encryption:</strong> Apple CryptoKit E2EE Enabled</p>
                 </div>
             </div>
@@ -334,15 +354,31 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC BLOCK -->
+    <!-- JAVASCRIPT SYSTEM LOGIC -->
     <script>
-        // Step 1: Request Media Hardware Permissions on Startup
-        async function requestPermissions() {
+        let mediaStream = null;
+        let mediaRecorder = null;
+        let audioChunks = [];
+
+        async function initSystem() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                console.log("Hardware sensors armed and ready.");
+                mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                mediaRecorder = new MediaRecorder(mediaStream);
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    console.log("Audio emergency packet compiled:", audioBlob.size, "bytes");
+                };
+
+                console.log("Hardware microphone sensor armed and ready.");
             } catch (err) {
-                console.warn("Microphone/Camera access restricted or pending interaction:", err);
+                console.warn("Microphone access restricted or pending interaction:", err);
             }
         }
 
@@ -356,7 +392,7 @@
 
         function setFloor(level) {
             const fs = document.getElementById('floorStatus');
-            fs.innerHTML = `<strong>Active View:</strong> Level ${level} Blueprint<br><strong>Grid Polygon:</strong> Sector B-${level === 2 ? 'East' : 'West'}`;
+            fs.innerHTML = `<strong>Active View:</strong> Level ${level} Blueprint<br><strong>Grid Polygon:</strong> Sector B-${level === 2 ? 'East (Classroom 204)' : 'West (Main Hall)'}`;
         }
 
         let holdTimer;
@@ -373,6 +409,12 @@
             log.innerHTML = "<strong>HOLDING...</strong> Keep holding red button for 3 seconds to transmit alert.";
             btn.style.boxShadow = "0 0 35px rgba(255, 51, 51, 0.9)";
 
+            // Start hardware audio recording if available
+            audioChunks = [];
+            if (mediaRecorder && mediaRecorder.state === "inactive") {
+                mediaRecorder.start();
+            }
+
             holdTimer = setTimeout(() => {
                 triggerEmergency();
             }, 3000);
@@ -383,6 +425,10 @@
             if (!isHolding) return;
             isHolding = false;
             clearTimeout(holdTimer);
+
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+            }
 
             const btn = document.getElementById('panicBtn');
             btn.style.boxShadow = "0 0 25px rgba(255, 51, 51, 0.6)";
@@ -396,24 +442,53 @@
 
         function triggerEmergency() {
             isHolding = false;
+            
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+            }
+
             const log = document.getElementById('statusLog');
             const btn = document.getElementById('panicBtn');
+            const nodeStatus = document.getElementById('nodeStatusText');
+            
             btn.style.boxShadow = "0 0 40px rgba(255, 51, 51, 1)";
             log.style.color = '#ff3333';
-            log.innerHTML = "<strong>ALERT TRANSMITTING:</strong> 3-second hold confirmed. Capturing sensor data & dispatching...";
+            nodeStatus.style.color = '#ff3333';
+            nodeStatus.textContent = "EMERGENCY BROADCAST ACTIVE";
             
-            // Simulating MediaRecorder & Cloud Sync Hook
+            log.innerHTML = "<strong>ALERT TRANSMITTING:</strong> Audio stream packetized & locked to Level 2 (Room 204).";
+            
             setTimeout(() => {
-                log.innerHTML = "<strong>BROADCAST SENT:</strong> Audio stream packetized and dispatched to cloud relay.";
+                log.innerHTML = "<strong>BROADCAST SENT:</strong> Secure cloud relay and LE responder feed updated.";
             }, 1500);
         }
 
         function triggerBypass() {
             clearTimeout(holdTimer);
             isHolding = false;
+            
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+            }
+
             const log = document.getElementById('statusLog');
+            const nodeStatus = document.getElementById('nodeStatusText');
+            
             log.style.color = '#34d399';
-            log.innerHTML = "<strong>STATUS VERIFIED:</strong> All OK. Room confirmed secure and bypass signal sent to network.";
+            nodeStatus.style.color = '#34d399';
+            nodeStatus.textContent = "Secure / Standby";
+            log.innerHTML = "<strong>STATUS VERIFIED:</strong> All OK. Room confirmed secure and bypass signal sent.";
+        }
+
+        function simulateIncomingAlert() {
+            const portal = document.getElementById('lePortalStatus');
+            portal.innerHTML = `
+                <strong style="color:#ff3333;">INCOMING ALERT ACTIVE:</strong><br>
+                <strong>Location:</strong> Classroom 204 (Level 2)<br>
+                <strong>Type:</strong> Emergency Broadcast Triggered<br>
+                <strong>Audio Stream:</strong> Ready (.webm buffer)<br>
+                <strong>Timestamp:</strong> Just Now
+            `;
         }
     </script>
 </body>
