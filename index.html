@@ -8,11 +8,10 @@
         :root {
             --royal-blue: #0b1d3a;
             --neon-blue: #00f0ff;
-            /* Lighter dark glass tone */
             --glass-bg: rgba(20, 45, 85, 0.45);
-            /* Gold border perimeter */
             --gold-border: #ffd700;
             --emergency-red: #ff3333;
+            --safe-green: #10b981;
             --text-light: #e0f7ff;
             --gold-text: #ffd700;
         }
@@ -98,7 +97,7 @@
 
         .panic-section {
             text-align: center;
-            margin: 30px 0;
+            margin: 25px 0 15px 0;
         }
 
         .panic-btn {
@@ -119,6 +118,35 @@
         .panic-btn:active {
             transform: scale(0.95);
             box-shadow: 0 0 15px rgba(255, 51, 51, 0.8);
+        }
+
+        /* Green Rectangle Bypass Button (Wider than the 140px red button) */
+        .bypass-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .bypass-btn {
+            width: 100%;
+            background: rgba(16, 185, 129, 0.25);
+            border: 2px solid var(--safe-green);
+            color: #34d399;
+            font-size: 0.85rem;
+            font-weight: bold;
+            padding: 14px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .bypass-btn:hover {
+            background: rgba(16, 185, 129, 0.4);
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+            color: #ffffff;
         }
 
         .status-log {
@@ -163,8 +191,12 @@
                 <button class="panic-btn" onclick="triggerEmergency()">EMERGENCY<br>BROADCAST</button>
             </div>
 
+            <div class="bypass-section">
+                <button class="bypass-btn" onclick="triggerBypass()">ALL OK GOOD SECURE BYPASS</button>
+            </div>
+
             <div class="status-log" id="statusLog">
-                System online. Tap red button above to initiate campus-wide broadcast.
+                System online. Tap red button above to initiate broadcast, or green bypass to clear status.
             </div>
 
             <div class="disclaimer">
@@ -182,6 +214,12 @@
             setTimeout(() => {
                 log.innerHTML = "<strong>BROADCAST SENT:</strong> Audio/Photo dispatched to cloud secure relay and LE portal.";
             }, 1500);
+        }
+
+        function triggerBypass() {
+            const log = document.getElementById('statusLog');
+            log.style.color = '#34d399';
+            log.innerHTML = "<strong>STATUS VERIFIED:</strong> All OK. Room confirmed secure and bypass signal sent to network.";
         }
     </script>
 </body>
