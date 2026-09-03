@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TACNET SCHOOL - Multi-Page Master System</title>
+    <title>TACNET SCHOOL - Production Master System</title>
     <style>
         :root {
             --royal-blue: #0b1d3a;
@@ -69,7 +69,7 @@
 
         .nav-tabs {
             display: flex;
-            gap: 5px;
+            gap: 4px;
             margin-bottom: 15px;
             justify-content: center;
         }
@@ -78,13 +78,15 @@
             background: rgba(11, 29, 58, 0.8);
             border: 1px solid var(--gold-border);
             color: var(--gold-text);
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: bold;
-            padding: 6px 8px;
+            padding: 6px 6px;
             border-radius: 4px;
             cursor: pointer;
             text-transform: uppercase;
             transition: all 0.2s ease;
+            flex: 1;
+            text-align: center;
         }
 
         .nav-tab.active, .nav-tab:hover {
@@ -262,12 +264,13 @@
             <h1>TACNET SCHOOL</h1>
             <div class="subtitle">Life saving assisting agent</div>
             
-            <!-- Page Navigation Selector Tabs -->
+            <!-- Page Navigation Selector Tabs (5 Pages Fully Integrated) -->
             <div class="nav-tabs">
                 <button class="nav-tab active" onclick="switchPage('page1')">1. Console</button>
-                <button class="nav-tab" onclick="switchPage('page2')">2. Indoor Map</button>
+                <button class="nav-tab" onclick="switchPage('page2')">2. Map</button>
                 <button class="nav-tab" onclick="switchPage('page3')">3. LE Portal</button>
-                <button class="nav-tab" onclick="switchPage('page4')">4. Database</button>
+                <button class="nav-tab" onclick="switchPage('page4')">4. Active Shooter</button>
+                <button class="nav-tab" onclick="switchPage('page5')">5. Bus Track</button>
             </div>
 
             <div class="badge-row">
@@ -334,13 +337,30 @@
                 </div>
             </div>
 
-            <!-- PAGE 4: BACKEND CONFIG & CLOUDKIT SYNC -->
+            <!-- PAGE 4: ACTIVE SHOOTER MODULE -->
             <div id="page4" class="page-content">
                 <div class="module-card">
-                    <h3>Backend Architecture</h3>
-                    <p><strong>Database:</strong> CloudKit / Supabase Relational Schema</p>
-                    <p><strong>Media Capture:</strong> Live MediaRecorder API Active</p>
-                    <p><strong>Encryption:</strong> Apple CryptoKit E2EE Enabled</p>
+                    <h3>Active Shooter Threat Vector</h3>
+                    <p>Real-time sector isolation and lockdown command distribution across campus zones.</p>
+                    <button class="action-btn" style="background:rgba(255,51,51,0.25); border-color:var(--emergency-red); color:#ff6666;" onclick="triggerLockdown()">Initiate Campus Lockdown</button>
+                </div>
+                <div class="location-box" id="lockdownStatus">
+                    <strong>Zone Status:</strong> Normal Operations<br>
+                    <strong>Perimeter Gates:</strong> Closed & Monitored<br>
+                    <strong>Responder Routing:</strong> Standby
+                </div>
+            </div>
+
+            <!-- PAGE 5: SCHOOL BUS TRACKING MODULE -->
+            <div id="page5" class="page-content">
+                <div class="module-card">
+                    <h3>School Bus Fleet Telemetry</h3>
+                    <p>Live route tracking and geofence arrival alerts for transportation coordinators.</p>
+                </div>
+                <div class="location-box">
+                    <strong>Bus Fleet:</strong> Unit #14 (En Route)<br>
+                    <strong>Location:</strong> Route 29 North Corridor<br>
+                    <strong>Next Stop:</strong> Central High Campus (ETA 4 Mins)
                 </div>
             </div>
 
@@ -409,7 +429,6 @@
             log.innerHTML = "<strong>HOLDING...</strong> Keep holding red button for 3 seconds to transmit alert.";
             btn.style.boxShadow = "0 0 35px rgba(255, 51, 51, 0.9)";
 
-            // Start hardware audio recording if available
             audioChunks = [];
             if (mediaRecorder && mediaRecorder.state === "inactive") {
                 mediaRecorder.start();
@@ -489,6 +508,19 @@
                 <strong>Audio Stream:</strong> Ready (.webm buffer)<br>
                 <strong>Timestamp:</strong> Just Now
             `;
+        }
+
+        function triggerLockdown() {
+            const lockdownBox = document.getElementById('lockdownStatus');
+            lockdownBox.innerHTML = `
+                <strong style="color:#ff3333;">CAMPUS LOCKDOWN ENGAGED:</strong><br>
+                <strong>Sector:</strong> All Zones Isolated<br>
+                <strong>Command Sent:</strong> Strobe & Audio Alarms Activated<br>
+                <strong>Responder Route:</strong> En Route to Building Perimeter
+            `;
+            const log = document.getElementById('statusLog');
+            log.style.color = '#ff3333';
+            log.innerHTML = "<strong>LOCKDOWN BROADCAST:</strong> Campus-wide security protocol initiated.";
         }
     </script>
 </body>
